@@ -1,0 +1,3 @@
+[submodule "YahooGroups-Archiver"]
+	path = YahooGroups-Archiver
+	url = https://github.com/andrewferguson/YahooGroups-Archiver.git
