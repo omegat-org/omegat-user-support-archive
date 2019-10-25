@@ -19,7 +19,9 @@ dump: submodules $(TARGET_LINK) | $(PYENV) work
 
 # Date format for MBOX format (RFC 5322) taken from coreutils `date`:
 # https://github.com/coreutils/coreutils/blob/c1e19656c8aa7a1e81416e024af0cdfe652df7b2/src/date.c#L76
-JSON_TO_TXT := jq -r '.ygData|["From "+(.from|split(" ")|.[-1])+" "+(.postDate|tonumber|gmtime|strftime("%a, %d %b %Y %H:%M:%S %z")),.rawEmail]|.[]'
+# ...but modified to be compatible with Mailman's `cleanarch` script:
+# https://github.com/python/cpython/blob/c80955cdee60c2688819a99a4c54252d77998263/Lib/mailbox.py#L2127
+JSON_TO_TXT := jq -r '.ygData|["From "+(.from|ltrimstr(" ")|rtrimstr(" ")|split(" ")|.[-1])+" "+(.postDate|tonumber|gmtime|strftime("%a %b %d %H:%M:%S %Y")),.rawEmail]|.[]'
 
 UNESCAPE := recode html..utf-8
 
