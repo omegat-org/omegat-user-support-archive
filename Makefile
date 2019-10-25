@@ -42,6 +42,18 @@ $(MBOX): | work
 	$(if $(wildcard work/*.json),,$(error Run `make dump` first))
 	cd work; ls | sort -nr | xargs cat | $(JSON_TO_TXT) | $(UNESCAPE) > $(PWD)/$(@)
 
+MBOX_CLEAN := $(MBOX:.mbox=.clean.mbox)
+
+.PHONY: mbox-clean
+mbox-clean: ## Produce an MBOX cleaned by Mailman
+mbox-clean: $(MBOX_CLEAN)
+
+$(MBOX_CLEAN): $(MBOX)
+	docker run -t --rm \
+		-v $(PWD):/work \
+		fauria/mailman  \
+		sh -c '</work/OmegaT.mbox /var/lib/mailman/bin/cleanarch -q' > OmegaT.clean.mbox
+
 .PHONY: proxy-start
 proxy-start: ## Start reverse proxy for Mailman
 proxy-start:
