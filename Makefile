@@ -23,6 +23,14 @@ JSON_TO_TXT := jq -r '.ygData|["From "+(.from|split(" ")|.[-1])+" "+(.postDate|t
 
 UNESCAPE := recode html..utf-8
 
+MSG :=
+
+.PHONY: view
+view: ## View a single dumped message as text
+view:
+	$(if $(MSG),,$(error Specify a message with MSG=1234))
+	@<work/$(MSG).json $(JSON_TO_TXT) | $(UNESCAPE)
+
 MBOX := $(GROUP).mbox
 
 .PHONY: mbox
