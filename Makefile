@@ -42,7 +42,7 @@ mbox: $(MBOX)
 $(MBOX): | work
 # This task doesn't use proper dependencies for optimization purposes
 	$(if $(wildcard work/*.json),,$(error Run `make dump` first))
-	cd work; ls | sort -nr | xargs cat | $(JSON_TO_TXT) | $(UNESCAPE) > $(PWD)/$(@)
+	cd work; ls | sort -n | xargs cat | $(JSON_TO_TXT) | $(UNESCAPE) > $(PWD)/$(@)
 
 MBOX_CLEAN := $(MBOX:.mbox=.clean.mbox)
 
