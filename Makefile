@@ -54,7 +54,7 @@ $(MBOX_CLEAN): $(MBOX)
 	docker run -t --rm \
 		-v $(PWD):/work \
 		fauria/mailman  \
-		sh -c '</work/OmegaT.mbox /var/lib/mailman/bin/cleanarch -q' > OmegaT.clean.mbox
+		sh -c '</work/OmegaT.mbox /var/lib/mailman/bin/cleanarch -q' | tr -d '\r' > OmegaT.clean.mbox
 
 .PHONY: proxy-start
 proxy-start: ## Start reverse proxy for Mailman
