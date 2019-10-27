@@ -23,7 +23,8 @@ dump: submodules $(TARGET_LINK) | $(PYENV) work
 # https://github.com/python/cpython/blob/c80955cdee60c2688819a99a4c54252d77998263/Lib/mailbox.py#L2127
 JSON_TO_TXT := jq -r '.ygData|["From "+(.from|ltrimstr(" ")|rtrimstr(" ")|split(" ")|.[-1]|ltrimstr("&lt;")|rtrimstr("&gt;"))+" "+(.postDate|tonumber|gmtime|strftime("%a %b %d %H:%M:%S %Y")),.rawEmail]|.[]'
 
-UNESCAPE := recode html..utf-8
+# Beware decoders like `recode` that mishandle invalid escapes like '&'
+UNESCAPE := perl -MHTML::Entities -pe 'binmode(STDOUT, ":utf8");decode_entities($$_);'
 
 MSG :=
 
