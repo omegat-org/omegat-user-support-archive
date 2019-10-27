@@ -34,6 +34,11 @@ view:
 	$(if $(MSG),,$(error Specify a message with MSG=1234))
 	@<work/$(MSG).json $(JSON_TO_TXT) | $(UNESCAPE)
 
+.PHONY: clean
+clean: ## Delete MBOX, Mailman data (does not delete ML dump)
+clean:
+	rm -rf *.mbox mailman
+
 MBOX := $(GROUP).mbox
 
 .PHONY: mbox
