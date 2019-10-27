@@ -57,45 +57,41 @@ $(MBOX_CLEAN): $(MBOX)
 		fauria/mailman  \
 		sh -c '</work/OmegaT.mbox /var/lib/mailman/bin/cleanarch 2>/dev/null' | tr -d '\r' > OmegaT.clean.mbox
 
-.PHONY: proxy-start
-proxy-start: ## Start reverse proxy for Mailman
-proxy-start:
-	ergo run -domain .wtf &
-
-.PHONY: proxy-stop
-proxy-stop: ## Stop reverse proxy for Mailman
-proxy-stop:
-	killall ergo
-
 mailman:
-# `chown` is recommended by container author, but caused errors for me
 	mkdir -p $(@)/archives/{private,public}
 	mkdir -p $(@)/lists
-#	sudo chown -R 0:38 $(@)/{archives,lists}
-#	sudo chown 33 $(@)/archives/private
-	mkdir -p $(@)/log/{apache2,exim4,mailman}
-#	sudo chown 0:4 $(@)/log/apache2
-#	sudo chown 105:4 $(@)/log/exim4
-#	sudo chown 0:38 $(@)/log/mailman
 
-.PHONY: mailman-start
-mailman-start: ## Start Mailman
-mailman-start: | mailman
-	$(info Set up mailing list at http://myarchive.wtf/mailman/listinfo)
-	docker run -it --rm \
-		-p '2222:80' \
-		-h myarchive.wtf \
-		-e DEBUG_CONTAINER=true \
-		-e URL_FQDN=myarchive.wtf \
-		-e EMAIL_FQDN=myarchive.wtf \
-		-v $(PWD)/mailman/archives:/var/lib/mailman/archives \
-		-v $(PWD)/mailman/lists:/var/lib/mailman/lists \
-		-v $(PWD)/mailman/keys:/etc/exim4/tls.d \
-		-v $(PWD)/mailman/log/apache2:/var/log/apache2 \
-		-v $(PWD)/mailman/log/exim4:/var/log/exim4 \
-		-v $(PWD)/mailman/log/mailman:/var/log/mailman \
-		-v $(PWD):/work \
-		fauria/mailman
+MAILMAN := docker run -it --rm \
+	-v $(PWD)/mailman/archives:/var/lib/mailman/archives \
+	-v $(PWD)/mailman/lists:/var/lib/mailman/lists \
+	fauria/mailman
+
+LIST_NAME := $(shell echo $(GROUP)-archive | tr A-Z a-z)
+LIST_MBOX_DIR := mailman/archives/private/$(LIST_NAME).mbox
+LIST_MBOX := $(LIST_MBOX_DIR)/$(LIST_NAME).mbox
+
+.PHONY: mailman-create
+mailman-create: ## Create a new mailing list
+mailman-create: $(LIST_MBOX_DIR)
+
+$(LIST_MBOX_DIR): | mailman
+	$(MAILMAN) /var/lib/mailman/bin/newlist -q -a \
+		--urlhost=myarchive.wtf \
+		$(LIST_NAME) \
+		owner@myarchive.wtf \
+		example
+
+$(LIST_MBOX): $(MBOX_CLEAN) | $(LIST_MBOX_DIR)
+	cp $(<) $(@)
+
+LIST_INDEX := mailman/archives/private/$(LIST_NAME)/index.html
+
+.PHONY: mailman-archive
+mailman-archive: ## Import MBOX into Mailman and build archives
+mailman-archive: $(LIST_INDEX)
+
+$(LIST_INDEX): | $(LIST_MBOX)
+	$(MAILMAN) /var/lib/mailman/bin/arch --wipe $(LIST_NAME)
 
 $(PYENV):
 	virtualenv $(@)
