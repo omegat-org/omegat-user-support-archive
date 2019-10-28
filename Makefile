@@ -84,9 +84,9 @@ mailman-create: $(LIST_MBOX_DIR)
 
 $(LIST_MBOX_DIR): | mailman
 	$(MAILMAN) /var/lib/mailman/bin/newlist -q -a \
-		--urlhost=myarchive.wtf \
+		--urlhost=example.com \
 		$(LIST_NAME) \
-		owner@myarchive.wtf \
+		owner@example.com \
 		example
 
 $(LIST_MBOX): $(MBOX_CLEAN) | $(LIST_MBOX_DIR)
