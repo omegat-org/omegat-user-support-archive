@@ -1,3 +1,5 @@
+export PATH := $(PWD)/bin:$(PATH)
+
 GROUP := OmegaT
 
 SUBMODULES := YahooGroups-Archiver
@@ -17,14 +19,6 @@ dump: ## Download raw JSON for group
 dump: submodules $(TARGET_LINK) | $(PYENV) work
 	$(ARCHIVE_GROUP) $(GROUP)
 
-# Date format for MBOX format (RFC 5322) taken from coreutils `date`:
-# https://github.com/coreutils/coreutils/blob/c1e19656c8aa7a1e81416e024af0cdfe652df7b2/src/date.c#L76
-# ...but modified to be compatible with Mailman's `cleanarch` script:
-# https://github.com/python/cpython/blob/c80955cdee60c2688819a99a4c54252d77998263/Lib/mailbox.py#L2127
-JSON_TO_TXT := jq -r '.ygData|["From "+(.from|ltrimstr(" ")|rtrimstr(" ")|split(" ")|.[-1]|ltrimstr("&lt;")|rtrimstr("&gt;"))+" "+(.postDate|tonumber|gmtime|strftime("%a %b %d %H:%M:%S %Y")),.rawEmail]|.[]'
-
-# Beware decoders like `recode` that mishandle invalid escapes like '&'
-UNESCAPE := perl -MHTML::Entities -pe 'binmode(STDOUT, ":utf8");decode_entities($$_);'
 
 MSG :=
 
@@ -32,7 +26,7 @@ MSG :=
 view: ## View a single dumped message as text
 view:
 	$(if $(MSG),,$(error Specify a message with MSG=1234))
-	@<work/$(MSG).json $(JSON_TO_TXT) | $(UNESCAPE)
+	@<work/$(MSG).json json2txt | unescape
 
 .PHONY: clean
 clean: ## Delete MBOX, Mailman data (does not delete ML dump)
@@ -48,7 +42,7 @@ mbox: $(MBOX)
 $(MBOX): | work
 # This task doesn't use proper dependencies for optimization purposes
 	$(if $(wildcard work/*.json),,$(error Run `make dump` first))
-	cd work; ls | sort -n | xargs cat | $(JSON_TO_TXT) | $(UNESCAPE) > $(PWD)/$(@)
+	cd work; ls | sort -n | xargs cat | json2txt | unescape > $(PWD)/$(@)
 
 MBOX_CLEAN := $(MBOX:.mbox=.clean.mbox)
 

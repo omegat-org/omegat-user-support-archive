@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# Beware decoders like `recode` that mishandle invalid escapes like '&'
+perl -MHTML::Entities -pe 'binmode(STDOUT, ":utf8");decode_entities($_);' </dev/stdin
