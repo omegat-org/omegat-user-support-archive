@@ -101,6 +101,19 @@ mailman-archive: $(LIST_INDEX)
 $(LIST_INDEX): | $(LIST_MBOX)
 	$(MAILMAN) /var/lib/mailman/bin/arch --wipe $(LIST_NAME)
 
+USER :=
+HOST := web.sourceforge.net
+DEPLOY_TARGET := /home/project-web/omegat/htdocs
+DRY_RUN ?= -n
+
+.PHONY: deploy
+deploy: ## Deploy Mailman archive to remote server
+deploy: $(LIST_INDEX)
+	$(if $(USER),,$(error Specify user with USER=))
+	$(if $(DRY_RUN),$(info Dry run. Specify DRY_RUN= to actually deploy.))
+	cd $$(dirname $(LIST_INDEX)); \
+		rsync -av --size-only $(DRY_RUN) -e ssh . $(USER)@$(HOST):$(DEPLOY_TARGET)/user-support-archive
+
 $(PYENV):
 	virtualenv $(@)
 	$(@)/bin/pip install requests
