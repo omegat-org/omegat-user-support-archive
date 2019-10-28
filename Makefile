@@ -19,6 +19,14 @@ dump: ## Download raw JSON for group
 dump: submodules $(TARGET_LINK) | $(PYENV) work
 	$(ARCHIVE_GROUP) $(GROUP)
 
+CPUS := $(shell sysctl -n hw.ncpu)
+
+.PHONY: validate
+validate: ## Check dumped messages for errors
+validate:
+	$(if $(wildcard work/*.json),,$(error Run `make dump` first))
+	cd work; ls | sort -nr | xargs -n 1 -P $(CPUS) sh -c \
+		'cat $$0 | json2txt | unescape | validate || echo $$0 invalid'
 
 MSG :=
 

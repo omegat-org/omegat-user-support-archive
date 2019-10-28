@@ -1,0 +1,16 @@
+#!/usr/bin/env python3
+
+from email import message_from_file, policy
+
+if __name__ == '__main__':
+    import sys
+    m = message_from_file(sys.stdin, policy=policy.default)
+    if m.defects:
+        print(m.defects)
+        sys.exit(1)
+    p = m.get_payload()
+    # Payload is a list if multipart; consider that to be "not empty"
+    empty = isinstance(p, str) and not p.strip()
+    if empty:
+        print('Empty body')
+        sys.exit(1)
