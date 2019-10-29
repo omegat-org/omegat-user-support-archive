@@ -74,7 +74,7 @@ MAILMAN := docker run -it --rm \
 	-v $(PWD)/mailman/lists:/var/lib/mailman/lists \
 	fauria/mailman
 
-LIST_NAME := $(shell echo $(GROUP)-archive | tr A-Z a-z)
+LIST_NAME := omegat-user-support
 LIST_MBOX_DIR := mailman/archives/private/$(LIST_NAME).mbox
 LIST_MBOX := $(LIST_MBOX_DIR)/$(LIST_NAME).mbox
 
