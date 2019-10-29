@@ -130,6 +130,8 @@ $(addsuffix /.git,$(SUBMODULES)):
 help: ## Show this help text
 	$(info usage: make [target])
 	$(info )
+	$(info Specify the group name with GROUP=foo (default: $(GROUP)))
+	$(info )
 	$(info Available targets:)
 	@awk -F ':.*?## *' '/^[^\t].+?:.*?##/ \
          {printf "  %-24s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
