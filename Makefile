@@ -82,11 +82,13 @@ LIST_MBOX := $(LIST_MBOX_DIR)/$(LIST_NAME).mbox
 mailman-create: ## Create a new mailing list
 mailman-create: $(LIST_MBOX_DIR)
 
+ARCHIVE_HOST := example.com
+
 $(LIST_MBOX_DIR): | mailman
 	$(MAILMAN) /var/lib/mailman/bin/newlist -q -a \
-		--urlhost=example.com \
+		--urlhost=$(ARCHIVE_HOST) \
 		$(LIST_NAME) \
-		owner@example.com \
+		owner@$(ARCHIVE_HOST) \
 		example
 
 $(LIST_MBOX): $(MBOX_CLEAN) | $(LIST_MBOX_DIR)
@@ -100,6 +102,15 @@ mailman-archive: $(LIST_INDEX)
 
 $(LIST_INDEX): | $(LIST_MBOX)
 	$(MAILMAN) /var/lib/mailman/bin/arch --wipe $(LIST_NAME)
+
+HOMEPAGE := https://github.com/omegat-org/omegat-user-support-archive
+
+.PHONY: mailman-fixup
+mailman-fixup: ## Post-process Mailman archive
+mailman-fixup: export LC_ALL := C
+mailman-fixup: $(LIST_INDEX)
+	find $$(dirname $(LIST_INDEX)) -type f -print0 | xargs -0 -P $(CPUS) \
+		sed -i '' 's|http://$(ARCHIVE_HOST)/cgi-bin/mailman/listinfo/$(LIST_NAME)|$(HOMEPAGE)|g'
 
 USER :=
 HOST := web.sourceforge.net
