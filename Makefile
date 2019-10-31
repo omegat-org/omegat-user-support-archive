@@ -59,11 +59,10 @@ mbox-clean: ## Produce an MBOX cleaned by Mailman
 mbox-clean: $(MBOX_CLEAN)
 
 $(MBOX_CLEAN): $(MBOX)
-	docker run -t --rm \
-		-v $(PWD):/work \
+	<$(<) docker run -i --rm \
 		fauria/mailman  \
-		sh -c '</work/OmegaT.mbox /var/lib/mailman/bin/cleanarch 2>/dev/null' | \
-		tr -d '\r' > OmegaT.clean.mbox
+		/var/lib/mailman/bin/cleanarch | \
+		tr -d '\r' > $(@)
 
 mailman:
 	mkdir -p $(@)/archives/{private,public}
